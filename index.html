@@ -146,7 +146,7 @@ body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
 .dtags .badge.one{background:var(--bg);border-color:var(--line-2);color:var(--navy)}
 .dprice{font-size:34px;font-weight:800;color:var(--text);margin:18px 0 6px;font-variant-numeric:tabular-nums}
 .specs{margin:14px 0 20px;border-top:1px solid var(--line)}
-.spec{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.spec{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .spec dt{color:var(--muted);font-weight:600;font-size:14px}
 .spec dd{margin:0;font-weight:600;font-size:15px}
 .buy.big{font-size:16px;padding:14px 16px}
@@ -378,7 +378,7 @@ function openCard(c){
           ${row("Year", esc(c.year))}
           ${row("Set", esc(c.set))}
           ${row("Sport", esc(c.sport))}
-          ${row("Card #", c.id)}
+          ${row("Card inventory #", c.id)}
         </dl>
         <button class="buy big" data-copy="${c.id}">I want this card</button>
         <p class="copied" aria-live="polite"></p>
