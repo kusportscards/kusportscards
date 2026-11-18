@@ -96,11 +96,11 @@ body{padding-bottom:84px}
 .media img{width:100%;height:100%;object-fit:cover;display:block}
 .media.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(160deg,#18243B,#24324D)}
 .media.empty .mark{font-family:var(--display);font-weight:800;font-size:54px;line-height:1;color:#fff;letter-spacing:-.02em}
-.media.empty .mark.one{color:var(--orange)}
+.media.empty .mark.one{color:#fff}
 .media.empty .cap{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9AA8BF}
 .badges{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
 .badge{font-size:11px;font-weight:700;letter-spacing:.03em;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.95);color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.15)}
-.badge.one{background:var(--orange);color:#fff}
+.badge.one{background:rgba(255,255,255,.95);color:var(--navy)}
 .flip{position:absolute;right:10px;bottom:10px;border:0;background:rgba(20,32,52,.82);color:#fff;font-size:12px;font-weight:600;padding:6px 10px;border-radius:999px;cursor:pointer}
 .flip:hover{background:var(--navy)}
 .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
@@ -132,7 +132,7 @@ body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
 .dphoto img{width:100%;height:100%;object-fit:contain;display:block}
 .dphoto.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(160deg,#18243B,#24324D)}
 .dphoto .mark{font-family:var(--display);font-weight:800;font-size:96px;color:#fff}
-.dphoto .mark.one{color:var(--orange)}
+.dphoto .mark.one{color:#fff}
 .dphoto .cap{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9AA8BF}
 .thumbs{display:flex;gap:10px;margin-top:12px;justify-content:center}
 .thumbs button{width:76px;aspect-ratio:3/4;border:2px solid var(--line);border-radius:8px;overflow:hidden;padding:0;cursor:pointer;background:#1A2740}
@@ -143,7 +143,7 @@ body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
 .dinfo h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4vw,44px);line-height:1.08;color:var(--navy);margin:6px 0 12px;letter-spacing:-.02em;text-wrap:balance}
 .dtags{display:flex;gap:8px}
 .dtags .badge{font-size:13px;padding:6px 10px;background:var(--bg);border:1px solid var(--line-2);box-shadow:none}
-.dtags .badge.one{background:var(--orange);border-color:var(--orange);color:#fff}
+.dtags .badge.one{background:var(--bg);border-color:var(--line-2);color:var(--navy)}
 .dprice{font-size:34px;font-weight:800;color:var(--text);margin:18px 0 6px;font-variant-numeric:tabular-nums}
 .specs{margin:14px 0 20px;border-top:1px solid var(--line)}
 .spec{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
