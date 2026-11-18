@@ -116,6 +116,46 @@ body{padding-bottom:84px}
 .copied:empty{display:none}
 .empty-state{grid-column:1/-1;text-align:center;color:var(--muted);padding:64px 0}
 
+/* Single-card page */
+.mlink,.media.empty{display:block;color:inherit;text-decoration:none;width:100%;height:100%}
+.media.empty{display:flex}
+.player a{text-decoration:none;color:inherit}
+.player a:hover{text-decoration:underline}
+.card{cursor:default}
+.detail{display:none;padding:24px 24px 96px}
+body.viewing .detail{display:block}
+body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
+.back{display:inline-block;margin-bottom:18px;font-weight:700;color:var(--steel);text-decoration:none}
+.back:hover{text-decoration:underline}
+.dgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:44px;align-items:start}
+.dphoto{background:#1A2740;border-radius:14px;overflow:hidden;aspect-ratio:3/4;width:100%;max-width:calc(62vh * .75);margin:0 auto}
+.dphoto img{width:100%;height:100%;object-fit:contain;display:block}
+.dphoto.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(160deg,#18243B,#24324D)}
+.dphoto .mark{font-family:var(--display);font-weight:800;font-size:96px;color:#fff}
+.dphoto .mark.one{color:var(--orange)}
+.dphoto .cap{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#9AA8BF}
+.thumbs{display:flex;gap:10px;margin-top:12px;justify-content:center}
+.thumbs button{width:76px;aspect-ratio:3/4;border:2px solid var(--line);border-radius:8px;overflow:hidden;padding:0;cursor:pointer;background:#1A2740}
+.thumbs button[aria-pressed="true"]{border-color:var(--orange)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.dinfo{position:sticky;top:24px}
+.dmeta{margin:0;color:var(--muted);font-weight:600;font-size:15px}
+.dinfo h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,4vw,44px);line-height:1.08;color:var(--navy);margin:6px 0 12px;letter-spacing:-.02em;text-wrap:balance}
+.dtags{display:flex;gap:8px}
+.dtags .badge{font-size:13px;padding:6px 10px;background:var(--bg);border:1px solid var(--line-2);box-shadow:none}
+.dtags .badge.one{background:var(--orange);border-color:var(--orange);color:#fff}
+.dprice{font-size:34px;font-weight:800;color:var(--text);margin:18px 0 6px;font-variant-numeric:tabular-nums}
+.specs{margin:14px 0 20px;border-top:1px solid var(--line)}
+.spec{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.spec dt{color:var(--muted);font-weight:600;font-size:14px}
+.spec dd{margin:0;font-weight:600;font-size:15px}
+.buy.big{font-size:16px;padding:14px 16px}
+.dhelp{color:var(--muted);font-size:14px;margin:16px 0 10px}
+.dcontact{display:flex;gap:8px;flex-wrap:wrap}
+.dcontact a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:14px;color:var(--text);padding:9px 12px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel)}
+.dcontact a.ig{background:var(--navy);color:#fff;border-color:var(--navy)}
+.dcontact svg{width:16px;height:16px}
+
 /* Footer */
 footer{background:var(--navy);color:#C9D2E0;font-size:14px}
 footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:36px;padding-bottom:40px}
@@ -145,6 +185,10 @@ footer .small{color:#8E9AB0;font-size:13px;margin-top:10px}
   .flip{font-size:11px;padding:5px 8px}
   .intro .wrap{padding-top:28px;padding-bottom:28px}
   .intro p{font-size:15px}
+  .dgrid{grid-template-columns:1fr;gap:20px}
+  .dinfo{position:static}
+  .detail{padding:16px 16px 96px}
+  .dprice{font-size:28px}
   .buybox{min-width:0}
   .mbar{left:0;right:0;bottom:0;transform:none;border-radius:0;grid-template-columns:repeat(3,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
   .mbar a{flex-direction:column;gap:3px;font-size:12px;padding:8px 4px}
@@ -178,6 +222,8 @@ footer .small{color:#8E9AB0;font-size:13px;margin-top:10px}
     <option value="new">Newest first</option>
   </select>
 </div></div>
+
+<section class="detail wrap" id="detail" aria-live="polite"></section>
 
 <main class="wrap">
   <div class="resultbar"><span id="count"></span><span>Prices in USD</span></div>
@@ -261,9 +307,9 @@ $("#sort").addEventListener("change", e => { state.sort = e.target.value; render
 function media(c){
   const badges = `<div class="badges">${c.grade?`<span class="badge">${esc(c.grade)}</span>`:""}${c.serial==="1/1"?`<span class="badge one">1/1</span>`:(c.serial?`<span class="badge">${esc(c.serial)}</span>`:"")}</div>`;
   const p = PHOTOS[c.id];
-  if (p) return `<div class="media"><img src="${p[0]}" alt="Front of the ${esc(c.year+" "+c.player+" "+c.set)} card" loading="lazy" width="600" height="800">${badges}${p[1]?`<button class="flip" data-flip="${c.id}" aria-pressed="false">Show back</button>`:""}</div>`;
+  if (p) return `<div class="media"><a class="mlink" href="#card-${c.id}" aria-label="View ${esc(c.player)} card"><img src="${p[0]}" alt="Front of the ${esc(c.year+" "+c.player+" "+c.set)} card" loading="lazy" width="600" height="800">${badges}</a>${p[1]?`<button class="flip" data-flip="${c.id}" aria-pressed="false">Show back</button>`:""}</div>`;
   const mark = c.serial==="1/1" ? `<span class="mark one">1/1</span>` : `<span class="mark">${esc(c.serial || c.year)}</span>`;
-  return `<div class="media empty">${c.grade?badges:""}${mark}<span class="cap">Photo coming soon</span></div>`;
+  return `<a class="media empty" href="#card-${c.id}" aria-label="View ${esc(c.player)} card">${c.grade?badges:""}${mark}<span class="cap">Photo coming soon</span></a>`;
 }
 
 function render(){
@@ -281,7 +327,7 @@ function render(){
       ${media(c)}
       <div class="body">
         <div class="meta">${esc(c.year+" "+c.set)}</div>
-        <h3 class="player">${esc(c.player)}</h3>
+        <h3 class="player"><a href="#card-${c.id}">${esc(c.player)}</a></h3>
         <div class="row">${c.ask ? `<span class="price">${money(c.ask)}</span>` : `<span class="price ask">Message for price</span>`}<span class="id">${c.id}</span></div>
         <button class="buy" data-copy="${c.id}">I want this card</button>
         <p class="copied" id="m-${c.id}" aria-live="polite"></p>
@@ -289,7 +335,7 @@ function render(){
     </article>`).join("") : `<p class="empty-state">No cards match those filters.</p>`;
 }
 
-$("#grid").addEventListener("click", async e => {
+document.addEventListener("click", async e => {
   const f = e.target.closest("[data-flip]");
   if (f) {
     const back = f.getAttribute("aria-pressed") !== "true", p = PHOTOS[f.dataset.flip], img = f.parentElement.querySelector("img");
@@ -301,10 +347,62 @@ $("#grid").addEventListener("click", async e => {
   const msg = `Hi! Is your ${c.year} ${c.player} ${c.set.replace(/\s+/g," ")}${c.grade?" "+c.grade:""} (${c.id}) still available?`;
   const ways = [SHOP.instagram && `an Instagram DM to ${handle}`, SHOP.email && "an email", SHOP.phone && "a text"].filter(Boolean);
   const where = ways.length ? ` Paste it into ${ways.length>1 ? ways.slice(0,-1).join(", ")+" or "+ways.slice(-1) : ways[0]}.` : "";
-  try { await navigator.clipboard.writeText(msg); $("#m-"+c.id).textContent = "Message copied." + where; }
-  catch { $("#m-"+c.id).textContent = msg; }
+  const out = b.parentElement.querySelector(".copied");
+  try { await navigator.clipboard.writeText(msg); out.textContent = "Message copied." + where; }
+  catch { out.textContent = msg; }
 });
 render();
+
+/* Single-card view: #card-C015 opens that card on its own page. */
+let listScroll = 0;
+function row(k,v){ return v ? `<div class="spec"><dt>${k}</dt><dd>${v}</dd></div>` : ""; }
+function openCard(c){
+  const p = PHOTOS[c.id];
+  const numbering = c.serial==="1/1" ? "1/1 (one of one)" : c.serial ? `Numbered ${esc(c.serial)}` : "Not numbered";
+  const pic = p ? `<div class="dphoto"><img id="dimg" src="${p[0]}" alt="Front of the ${esc(c.year+" "+c.player+" "+c.set)} card"></div>
+      ${p[1] ? `<div class="thumbs">${p.map((src,i)=>`<button data-side="${i}" aria-pressed="${i===0}" aria-label="Show ${i?"back":"front"}"><img src="${src}" alt=""></button>`).join("")}</div>` : ""}`
+    : `<div class="dphoto empty"><span class="mark ${c.serial==="1/1"?"one":""}">${esc(c.serial||c.year)}</span><span class="cap">Photo coming soon</span></div>`;
+  $("#detail").innerHTML = `
+    <a class="back" href="#">← Back to all cards</a>
+    <div class="dgrid">
+      <div>${pic}</div>
+      <div class="dinfo">
+        <p class="dmeta">${esc(c.year+" "+c.set)}</p>
+        <h1>${esc(c.player)}</h1>
+        <div class="dtags">${c.grade?`<span class="badge">${esc(c.grade)}</span>`:`<span class="badge">Raw</span>`}${c.serial==="1/1"?`<span class="badge one">1/1</span>`:(c.serial?`<span class="badge">${esc(c.serial)}</span>`:"")}</div>
+        <p class="dprice">${c.ask ? money(c.ask) : "Message for price"}</p>
+        <dl class="specs">
+          ${row("Grade", esc(c.grade || "Raw (ungraded)"))}
+          ${row("Numbering", numbering)}
+          ${row("Year", esc(c.year))}
+          ${row("Set", esc(c.set))}
+          ${row("Sport", esc(c.sport))}
+          ${row("Card #", c.id)}
+        </dl>
+        <button class="buy big" data-copy="${c.id}">I want this card</button>
+        <p class="copied" aria-live="polite"></p>
+        <p class="dhelp">Tap the button to copy a message about this card, then send it to us on Instagram, by text or by email.</p>
+      </div>
+    </div>`;
+  document.title = `${c.year} ${c.player} ${c.set} | ${SHOP.name}`;
+  document.body.classList.add("viewing");
+  window.scrollTo(0,0);
+}
+function route(){
+  const m = location.hash.match(/^#card-(C\d+)$/), c = m && CARDS.find(x => x.id === m[1]);
+  if (c) { if (!document.body.classList.contains("viewing")) listScroll = window.scrollY; openCard(c); }
+  else if (document.body.classList.contains("viewing")) {
+    document.body.classList.remove("viewing"); document.title = SHOP.name; window.scrollTo(0, listScroll);
+  }
+}
+window.addEventListener("hashchange", route);
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-side]"); if (!t) return;
+  const c = CARDS.find(x => location.hash === "#card-"+x.id); if (!c) return;
+  $("#dimg").src = PHOTOS[c.id][+t.dataset.side];
+  document.querySelectorAll(".thumbs [data-side]").forEach(b => b.setAttribute("aria-pressed", b===t));
+});
+route();
 
 /* Text and email links can't open apps from inside some browsers' embedded viewers,
    so every phone/email link also shows the details with a Copy button. */
