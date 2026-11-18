@@ -159,6 +159,26 @@ body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
 .dcontact a.ig{background:var(--navy);color:#fff;border-color:var(--navy)}
 .dcontact svg{width:16px;height:16px}
 
+/* "I want this card" pop-up */
+.buywrap{position:fixed;inset:0;z-index:40;background:rgba(10,16,28,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.buywrap.show{display:flex}
+.buybox2{position:relative;background:var(--panel);border-radius:16px;max-width:440px;width:100%;padding:24px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.buybox2 h2{font-family:var(--display);font-weight:800;font-size:20px;color:var(--navy);margin:0 28px 4px 0}
+.buybox2 .sub{margin:0 0 16px;color:var(--muted);font-size:14px}
+.buybox2 .x{position:absolute;right:12px;top:10px;border:0;background:transparent;font-size:24px;line-height:1;color:var(--muted);cursor:pointer}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text);border:1px solid var(--line-2);border-radius:12px;padding:13px 14px}
+.opt:hover{border-color:var(--navy);background:var(--bg)}
+.opt svg{width:22px;height:22px;flex:none;color:var(--navy)}
+.opt b{display:block;font-size:15px}
+.opt small{display:block;color:var(--muted);font-size:12.5px}
+.opt.ig{background:var(--orange);border-color:var(--orange);color:#fff}
+.opt.ig svg,.opt.ig small{color:#fff}
+.opt.ig:hover{background:#F08C45}
+.msgpreview{margin:14px 0 0;font-size:13px;color:var(--muted);font-style:italic}
+.copynote{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--steel)}
+.copynote:empty{display:none}
+
 /* Footer */
 footer{background:var(--navy);color:#C9D2E0;font-size:14px}
 footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:36px;padding-bottom:40px}
@@ -244,6 +264,7 @@ footer .small{color:#8E9AB0;font-size:13px;margin-top:10px}
 </div></footer>
 
 <nav class="mbar" id="mbar" aria-label="Contact us"></nav>
+<div class="buywrap" id="buy"></div>
 <div class="toast" id="toast" role="dialog" aria-live="polite" aria-label="Contact details"></div>
 
 <script>
@@ -353,12 +374,38 @@ document.addEventListener("click", async e => {
   const b = e.target.closest("[data-copy]"); if (!b) return;
   const c = CARDS.find(x => x.id === b.dataset.copy);
   const msg = `Hi! Is your ${c.year} ${c.player} ${c.set.replace(/\s+/g," ")}${c.grade?" "+c.grade:""} (${c.id}) still available?`;
-  const ways = [SHOP.instagram && `an Instagram DM to ${handle}`, SHOP.email && "an email", SHOP.phone && "a text"].filter(Boolean);
-  const where = ways.length ? ` Paste it into ${ways.length>1 ? ways.slice(0,-1).join(", ")+" or "+ways.slice(-1) : ways[0]}.` : "";
-  const out = b.parentElement.querySelector(".copied");
-  try { await navigator.clipboard.writeText(msg); out.textContent = "Message copied." + where; }
-  catch { out.textContent = msg; }
+  openBuy(c, msg);
 });
+
+/* "I want this card" pop-up: pick Instagram, text or email. Text and email open with the message filled in;
+   Instagram can't pre-fill a DM, so the message is copied for the buyer to paste. */
+function openBuy(c, msg){
+  const num = SHOP.phone.replace(/[^0-9+]/g,""), enc = encodeURIComponent(msg);
+  const subject = encodeURIComponent(`Interested in ${c.year} ${c.player} (${c.id})`);
+  $("#buy").innerHTML = `
+    <div class="buybox2" role="dialog" aria-modal="true" aria-labelledby="buyttl">
+      <button class="x" data-close aria-label="Close">×</button>
+      <h2 id="buyttl">How would you like to reach us?</h2>
+      <p class="sub">${esc(c.year+" "+c.player+" "+c.set)}${c.ask?` · ${money(c.ask)}`:""}</p>
+      <div class="opts">
+        ${SHOP.instagram?`<a class="opt ig" href="https://ig.me/m/${handle.slice(1)}" target="_blank" rel="noopener" data-copymsg>${ICON.ig}<span><b>Instagram DM</b><small>Copies your message so you can paste it in the chat.</small></span></a>`:""}
+        ${SHOP.phone?`<a class="opt" href="sms:${num}?&body=${enc}">${ICON.phone}<span><b>Text ${esc(SHOP.phone)}</b><small>Opens your messages with the note filled in.</small></span></a>`:""}
+        ${SHOP.email?`<a class="opt" href="mailto:${SHOP.email}?subject=${subject}&body=${enc}">${ICON.mail}<span><b>Email us</b><small>Opens your email with the note filled in.</small></span></a>`:""}
+      </div>
+      <p class="msgpreview">Your message: “${esc(msg)}”</p>
+      <p class="copynote" aria-live="polite"></p>
+    </div>`;
+  $("#buy").classList.add("show"); $("#buy").dataset.msg = msg;
+  $("#buy .opt").focus();
+}
+function closeBuy(){ $("#buy").classList.remove("show"); }
+$("#buy").addEventListener("click", async e => {
+  if (e.target === $("#buy") || e.target.closest("[data-close]")) return closeBuy();
+  if (e.target.closest("[data-copymsg]")) {
+    try { await navigator.clipboard.writeText($("#buy").dataset.msg); $("#buy .copynote").textContent = "Message copied. Paste it into your Instagram DM."; } catch {}
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeBuy(); });
 render();
 
 /* Single-card view: #card-C015 opens that card on its own page. */
