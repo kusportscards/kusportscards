@@ -149,6 +149,9 @@ body.viewing .intro,body.viewing .toolbar,body.viewing main{display:none}
 .spec{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .spec dt{color:var(--muted);font-weight:600;font-size:14px}
 .spec dd{margin:0;font-weight:600;font-size:15px}
+.cert{display:block}
+.cert+.cert{margin-top:4px}
+.cert a{font-weight:600;font-size:13px;color:var(--steel);margin-left:6px;white-space:nowrap}
 .buy.big{font-size:16px;padding:14px 16px}
 .dhelp{color:var(--muted);font-size:14px;margin:16px 0 10px}
 .dcontact{display:flex;gap:8px;flex-wrap:wrap}
@@ -357,6 +360,15 @@ render();
 /* Single-card view: #card-C015 opens that card on its own page. */
 let listScroll = 0;
 function row(k,v){ return v ? `<div class="spec"><dt>${k}</dt><dd>${v}</dd></div>` : ""; }
+/* Grading-company lookups. PSA links straight to the slab's record; the others open the company's lookup page. */
+function certLinks(c){
+  const co = (c.grade.split(" ")[0] || "").toUpperCase();
+  const site = {BGS:["https://www.beckett.com/grading","Beckett"], SGC:["https://gosgc.com","SGC"], CGC:["https://www.cgccards.com/certlookup/","CGC"]}[co];
+  return String(c.cert).split(",").map(x => x.trim()).filter(Boolean).map(n =>
+    co==="PSA" ? `<span class="cert">${esc(n)} <a href="https://www.psacard.com/cert/${encodeURIComponent(n)}" target="_blank" rel="noopener">Verify on PSA ↗</a></span>`
+    : site ? `<span class="cert">${esc(n)} <a href="${site[0]}" target="_blank" rel="noopener">Look up on ${site[1]} ↗</a></span>`
+    : `<span class="cert">${esc(n)}</span>`).join("");
+}
 function openCard(c){
   const p = PHOTOS[c.id];
   const numbering = c.serial==="1/1" ? "1/1 (one of one)" : c.serial ? `Numbered ${esc(c.serial)}` : "Not numbered";
@@ -374,6 +386,7 @@ function openCard(c){
         <p class="dprice">${c.ask ? money(c.ask) : "Message for price"}</p>
         <dl class="specs">
           ${row("Grade", esc(c.grade || "Raw (ungraded)"))}
+          ${c.cert ? row("Certification #", certLinks(c)) : ""}
           ${row("Numbering", numbering)}
           ${row("Year", esc(c.year))}
           ${row("Set", esc(c.set))}
