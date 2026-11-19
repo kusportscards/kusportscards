@@ -54,9 +54,9 @@ footer{background:var(--navy);color:#C9D2E0;font-size:14px}footer .wrap{padding-
 .sharebtn:hover{background:var(--navy);color:#fff}.sharebtn svg{width:18px;height:18px}
 .sharewrap{position:fixed;inset:0;z-index:40;background:rgba(10,16,28,.6);display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
 .sharewrap.show{display:flex}
-.sharebox{position:relative;background:var(--panel);border-radius:16px;max-width:860px;width:100%;padding:22px;display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:22px}
+.sharebox{position:relative;background:var(--panel);border-radius:16px;max-width:860px;width:100%;padding:22px;display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:22px}
 .sharebox h2{margin:0 28px 4px 0}.sharebox .x{position:absolute;right:12px;top:8px;border:0;background:transparent;font-size:26px;color:var(--muted);cursor:pointer}
-.sharebox img{width:100%;border-radius:10px;display:block;box-shadow:0 8px 24px -10px rgba(0,0,0,.4)}
+.sharebox img{width:100%;max-width:260px;margin:0 auto;border-radius:10px;display:block;box-shadow:0 8px 24px -10px rgba(0,0,0,.4)}
 .sharebox textarea{width:100%;min-height:150px;font:14px/1.5 var(--body);border:1px solid var(--line-2);border-radius:10px;padding:10px;resize:vertical;color:var(--text)}
 .sharebox .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .sharebox .acts button,.sharebox .acts a{border:1px solid var(--line-2);background:var(--panel);color:var(--text);font:700 13px var(--body);padding:9px 12px;border-radius:9px;cursor:pointer;text-decoration:none}
@@ -96,8 +96,8 @@ footer{background:var(--navy);color:#C9D2E0;font-size:14px}footer .wrap{padding-
   <button class="x" id="shx" aria-label="Close">×</button>
   <div><img id="shimg" alt="Instagram post image for this card"></div>
   <div>
-    <h2 id="shttl">Share to Instagram</h2>
-    <p class="hint">Post the image, paste the caption, and add the card link to a Story link sticker so followers can tap straight to this card.</p>
+    <h2 id="shttl">Share to your Instagram Story</h2>
+    <p class="hint">Share the image to your Story, then add a Link sticker with the card link so followers can tap straight to this card. The caption is there if you also post it to your feed.</p>
     <div class="acts"><button class="main" id="shshare" type="button">Share image</button><a id="shsave" download>Save image</a><button id="shcap" type="button">Copy caption</button><button id="shlink" type="button">Copy card link</button></div>
     <p class="ok" id="shok" aria-live="polite"></p>
     <textarea id="shtext" aria-label="Caption"></textarea>
@@ -125,28 +125,25 @@ function wrap(ctx, text, maxW){ const words = text.split(" "), lines = []; let l
   if (l) lines.push(l); return lines; }
 function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 async function drawPost(){
-  await Promise.all([document.fonts.load("800 60px Montserrat"), document.fonts.load("600 30px 'Plus Jakarta Sans'")]).catch(()=>{});
-  const cv = document.createElement("canvas"); cv.width = 1080; cv.height = 1350; const ctx = cv.getContext("2d");
-  ctx.fillStyle = "#142034"; ctx.fillRect(0, 0, 1080, 1350);
+  /* Story size (1080x1920): the card photo, the listing name and the price, nothing else.
+     Text stays clear of the top and bottom areas Instagram covers with its own buttons. */
+  await Promise.all([document.fonts.load("800 60px Montserrat")]).catch(()=>{});
+  const cv = document.createElement("canvas"); cv.width = 1080; cv.height = 1920; const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#142034"; ctx.fillRect(0, 0, 1080, 1920);
   if (CARD.photo){
     const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = CARD.photo; });
-    const boxW = 1000, boxH = 820, sc = Math.min(boxW / img.width, boxH / img.height), w = img.width * sc, h = img.height * sc;
-    ctx.save(); rr(ctx, 540 - w/2, 40 + (boxH - h)/2, w, h, 18); ctx.clip(); ctx.drawImage(img, 540 - w/2, 40 + (boxH - h)/2, w, h); ctx.restore();
+    const boxW = 960, boxH = 1140, top = 230, sc = Math.min(boxW / img.width, boxH / img.height), w = img.width * sc, h = img.height * sc;
+    ctx.save(); rr(ctx, 540 - w/2, top + (boxH - h)/2, w, h, 22); ctx.clip(); ctx.drawImage(img, 540 - w/2, top + (boxH - h)/2, w, h); ctx.restore();
   }
-  ctx.fillStyle = "#FFFFFF"; rr(ctx, 40, 890, 1000, 420, 24); ctx.fill();
-  ctx.fillStyle = "#667085"; ctx.font = "600 30px 'Plus Jakarta Sans', sans-serif";
-  const meta = wrap(ctx, CARD.line, 900).slice(0, 2); meta.forEach((t, i) => ctx.fillText(t, 80, 950 + i * 40));
-  let y = 950 + meta.length * 40 + 30;
-  ctx.fillStyle = "#142034"; ctx.font = "800 64px Montserrat, 'Arial Black', sans-serif";
-  wrap(ctx, CARD.player, 900).slice(0, 2).forEach(t => { ctx.fillText(t, 80, y + 20); y += 72; });
-  const chips = [CARD.grade || "Raw", CARD.serial === "1/1" ? "1/1" : CARD.serial].filter(Boolean);
-  ctx.font = "700 30px 'Plus Jakarta Sans', sans-serif"; let x = 80; y += 20;
-  chips.forEach(cp => { const w = ctx.measureText(cp).width + 36; ctx.strokeStyle = "#D0D5DD"; ctx.lineWidth = 3; rr(ctx, x, y, w, 56, 10); ctx.stroke();
-    ctx.fillStyle = "#142034"; ctx.fillText(cp, x + 18, y + 39); x += w + 14; });
-  ctx.fillStyle = "#E97E33"; ctx.font = "800 72px Montserrat, 'Arial Black', sans-serif"; ctx.textAlign = "right";
-  ctx.fillText(CARD.price, 1000, y + 52);
-  ctx.textAlign = "left"; ctx.fillStyle = "#3B6C93"; ctx.font = "700 28px 'Plus Jakarta Sans', sans-serif";
-  ctx.fillText(`DM @${CARD.ig} to buy · Card #${CARD.id}`, 80, 1270);
+  const name = `${CARD.line.split(" ")[0]} ${CARD.player} ${CARD.line.split(" ").slice(1).join(" ")}${CARD.grade ? " " + CARD.grade : ""}`;
+  ctx.textAlign = "center"; ctx.fillStyle = "#FFFFFF";
+  let size = 58; ctx.font = `800 ${size}px Montserrat, 'Arial Black', sans-serif`;
+  let lines = wrap(ctx, name, 940);
+  while (lines.length > 3 && size > 40){ size -= 4; ctx.font = `800 ${size}px Montserrat, 'Arial Black', sans-serif`; lines = wrap(ctx, name, 940); }
+  let y = 1450;
+  lines.slice(0, 3).forEach(t => { ctx.fillText(t, 540, y + size); y += size * 1.18; });
+  ctx.fillStyle = "#E97E33"; ctx.font = "800 104px Montserrat, 'Arial Black', sans-serif";
+  ctx.fillText(CARD.price, 540, y + 130);
   return new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.92));
 }
 let postBlob = null;
