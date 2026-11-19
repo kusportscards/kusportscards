@@ -144,8 +144,12 @@ async function drawPost(){
   while (lines.length > 2 && size > 38){ size -= 4; ctx.font = `800 ${size}px Montserrat, 'Arial Black', sans-serif`; lines = wrap(ctx, name, 980); }
   let y = 1475;
   lines.slice(0, 3).forEach(t => { ctx.fillText(t, 540, y + size); y += size * 1.18; });
-  ctx.fillStyle = "#E97E33"; ctx.font = "800 96px Montserrat, 'Arial Black', sans-serif";
-  ctx.fillText(CARD.price, 540, y + 115);
+  /* Price: larger, white, with a thick orange outline and a soft shadow so it pops. */
+  ctx.font = "800 124px Montserrat, 'Arial Black', sans-serif"; ctx.lineJoin = "round";
+  const py = y + 140;
+  ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6;
+  ctx.strokeStyle = "#E97E33"; ctx.lineWidth = 16; ctx.strokeText(CARD.price, 540, py); ctx.restore();
+  ctx.fillStyle = "#FFFFFF"; ctx.fillText(CARD.price, 540, py);
   return new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.92));
 }
 let postBlob = null;
