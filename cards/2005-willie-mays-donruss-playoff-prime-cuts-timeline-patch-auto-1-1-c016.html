@@ -50,6 +50,19 @@ h2{font-family:var(--display);font-size:18px;color:var(--navy);margin:0 0 10px}
 .opt.ig{background:var(--orange);border-color:var(--orange);color:#fff}.opt.ig svg,.opt.ig small{color:#fff}
 .note{font-size:13px;color:var(--muted);font-style:italic;margin:12px 0 0}.copied{font-size:13px;font-weight:600;color:var(--steel)}
 footer{background:var(--navy);color:#C9D2E0;font-size:14px}footer .wrap{padding-top:28px;padding-bottom:32px}
+.sharebtn{display:inline-flex;align-items:center;gap:8px;margin-top:14px;border:1px solid var(--navy);background:var(--panel);color:var(--navy);font:700 14px var(--body);padding:10px 14px;border-radius:9px;cursor:pointer}
+.sharebtn:hover{background:var(--navy);color:#fff}.sharebtn svg{width:18px;height:18px}
+.sharewrap{position:fixed;inset:0;z-index:40;background:rgba(10,16,28,.6);display:none;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.sharewrap.show{display:flex}
+.sharebox{position:relative;background:var(--panel);border-radius:16px;max-width:860px;width:100%;padding:22px;display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:22px}
+.sharebox h2{margin:0 28px 4px 0}.sharebox .x{position:absolute;right:12px;top:8px;border:0;background:transparent;font-size:26px;color:var(--muted);cursor:pointer}
+.sharebox img{width:100%;border-radius:10px;display:block;box-shadow:0 8px 24px -10px rgba(0,0,0,.4)}
+.sharebox textarea{width:100%;min-height:150px;font:14px/1.5 var(--body);border:1px solid var(--line-2);border-radius:10px;padding:10px;resize:vertical;color:var(--text)}
+.sharebox .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sharebox .acts button,.sharebox .acts a{border:1px solid var(--line-2);background:var(--panel);color:var(--text);font:700 13px var(--body);padding:9px 12px;border-radius:9px;cursor:pointer;text-decoration:none}
+.sharebox .acts .main{background:var(--orange);border-color:var(--orange);color:#fff}
+.sharebox .hint{font-size:13px;color:var(--muted);margin:10px 0 0}.sharebox .ok{font-size:13px;font-weight:600;color:var(--steel);min-height:1em;margin:6px 0 0}
+@media (max-width:760px){.sharebox{grid-template-columns:1fr}.sharebox img{max-width:300px;margin:0 auto}}
 @media (max-width:760px){.grid{grid-template-columns:1fr;gap:20px}.nav img{height:60px}.price{font-size:28px}}
 </style>
 </head>
@@ -66,6 +79,7 @@ footer{background:var(--navy);color:#C9D2E0;font-size:14px}footer .wrap{padding-
       <h1>Willie Mays</h1>
       <div class="tags"><span class="tag">Raw</span><span class="tag">1/1</span></div>
       <p class="price">$4,200</p>
+      <button class="sharebtn" id="sharebtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share to Instagram</button>
       <dl><div class="row"><dt>Grade</dt><dd>Raw (ungraded)</dd></div><div class="row"><dt>Numbering</dt><dd>1/1 (one of one)</dd></div><div class="row"><dt>Year</dt><dd>2005</dd></div><div class="row"><dt>Set</dt><dd>Donruss Playoff Prime Cuts Timeline Patch Auto 1/1</dd></div><div class="row"><dt>Sport</dt><dd>MLB</dd></div><div class="row"><dt>Card inventory #</dt><dd>C016</dd></div></dl>
       <h2>I want this card</h2>
       <div class="opts">
@@ -78,8 +92,86 @@ footer{background:var(--navy);color:#C9D2E0;font-size:14px}footer .wrap{padding-
     </div>
   </div>
 </main>
+<div class="sharewrap" id="sharewrap"><div class="sharebox" role="dialog" aria-modal="true" aria-labelledby="shttl">
+  <button class="x" id="shx" aria-label="Close">×</button>
+  <div><img id="shimg" alt="Instagram post image for this card"></div>
+  <div>
+    <h2 id="shttl">Share to Instagram</h2>
+    <p class="hint">Post the image, paste the caption, and add the card link to a Story link sticker so followers can tap straight to this card.</p>
+    <div class="acts"><button class="main" id="shshare" type="button">Share image</button><a id="shsave" download>Save image</a><button id="shcap" type="button">Copy caption</button><button id="shlink" type="button">Copy card link</button></div>
+    <p class="ok" id="shok" aria-live="polite"></p>
+    <textarea id="shtext" aria-label="Caption"></textarea>
+  </div>
+</div></div>
 <footer><div class="wrap"><b>KU Sports Cards</b> · The best quality at the best price.</div></footer>
 <script>
+const CARD = {"player": "Willie Mays", "line": "2005 Donruss Playoff Prime Cuts Timeline Patch Auto 1/1", "grade": "", "serial": "1/1", "price": "$4,200", "id": "C016", "cert": "", "sport": "MLB", "url": "https://kusportscards.github.io/kusportscards/cards/2005-willie-mays-donruss-playoff-prime-cuts-timeline-patch-auto-1-1-c016.html", "ig": "kusportscards", "photo": "../photos/C016-front.jpg"};
+
+/* Share to Instagram: draws a 1080x1350 post image of this card and writes a caption. */
+const $s = id => document.getElementById(id);
+const TAG = {NFL:"#footballcards", NBA:"#basketballcards", MLB:"#baseballcards", Soccer:"#soccercards", NHL:"#hockeycards"};
+function caption(){
+  const t = [`${CARD.line} ${CARD.player}${CARD.grade ? " " + CARD.grade : ""}`, "",
+    `Price: ${CARD.price}`,
+    `Numbering: ${CARD.serial === "1/1" ? "1/1 (one of one)" : CARD.serial ? "Numbered " + CARD.serial : "Not numbered"}`,
+    `Grade: ${CARD.grade || "Raw"}${CARD.cert ? " (cert " + CARD.cert + ")" : ""}`, "",
+    `DM to buy, or tap the link in our bio. Card #${CARD.id}`, "",
+    ["#" + CARD.player.replace(/[^A-Za-z]/g, "").toLowerCase(), CARD.grade ? "#" + CARD.grade.replace(/[^A-Za-z0-9]/g, "").toLowerCase() : "",
+     TAG[CARD.sport] || "#sportscards", "#sportscards", "#thehobby", "#kusportscards"].filter(Boolean).join(" ")];
+  return t.join("\n");
+}
+function wrap(ctx, text, maxW){ const words = text.split(" "), lines = []; let l = "";
+  for (const w of words){ const t = l ? l + " " + w : w; if (ctx.measureText(t).width > maxW && l){ lines.push(l); l = w; } else l = t; }
+  if (l) lines.push(l); return lines; }
+function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+async function drawPost(){
+  await Promise.all([document.fonts.load("800 60px Montserrat"), document.fonts.load("600 30px 'Plus Jakarta Sans'")]).catch(()=>{});
+  const cv = document.createElement("canvas"); cv.width = 1080; cv.height = 1350; const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#142034"; ctx.fillRect(0, 0, 1080, 1350);
+  if (CARD.photo){
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = CARD.photo; });
+    const boxW = 1000, boxH = 820, sc = Math.min(boxW / img.width, boxH / img.height), w = img.width * sc, h = img.height * sc;
+    ctx.save(); rr(ctx, 540 - w/2, 40 + (boxH - h)/2, w, h, 18); ctx.clip(); ctx.drawImage(img, 540 - w/2, 40 + (boxH - h)/2, w, h); ctx.restore();
+  }
+  ctx.fillStyle = "#FFFFFF"; rr(ctx, 40, 890, 1000, 420, 24); ctx.fill();
+  ctx.fillStyle = "#667085"; ctx.font = "600 30px 'Plus Jakarta Sans', sans-serif";
+  const meta = wrap(ctx, CARD.line, 900).slice(0, 2); meta.forEach((t, i) => ctx.fillText(t, 80, 950 + i * 40));
+  let y = 950 + meta.length * 40 + 30;
+  ctx.fillStyle = "#142034"; ctx.font = "800 64px Montserrat, 'Arial Black', sans-serif";
+  wrap(ctx, CARD.player, 900).slice(0, 2).forEach(t => { ctx.fillText(t, 80, y + 20); y += 72; });
+  const chips = [CARD.grade || "Raw", CARD.serial === "1/1" ? "1/1" : CARD.serial].filter(Boolean);
+  ctx.font = "700 30px 'Plus Jakarta Sans', sans-serif"; let x = 80; y += 20;
+  chips.forEach(cp => { const w = ctx.measureText(cp).width + 36; ctx.strokeStyle = "#D0D5DD"; ctx.lineWidth = 3; rr(ctx, x, y, w, 56, 10); ctx.stroke();
+    ctx.fillStyle = "#142034"; ctx.fillText(cp, x + 18, y + 39); x += w + 14; });
+  ctx.fillStyle = "#E97E33"; ctx.font = "800 72px Montserrat, 'Arial Black', sans-serif"; ctx.textAlign = "right";
+  ctx.fillText(CARD.price, 1000, y + 52);
+  ctx.textAlign = "left"; ctx.fillStyle = "#3B6C93"; ctx.font = "700 28px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText(`DM @${CARD.ig} to buy · Card #${CARD.id}`, 80, 1270);
+  return new Promise(ok => cv.toBlob(ok, "image/jpeg", 0.92));
+}
+let postBlob = null;
+$s("sharebtn").addEventListener("click", async () => {
+  $s("sharewrap").classList.add("show"); $s("shtext").value = caption(); $s("shok").textContent = "Making the image…";
+  try { postBlob = await drawPost(); const u = URL.createObjectURL(postBlob); $s("shimg").src = u; $s("shsave").href = u;
+    $s("shsave").download = `kusportscards-${CARD.id}.jpg`; $s("shok").textContent = ""; }
+  catch (e) { $s("shok").textContent = "Couldn't make the image. You can still copy the caption and link."; }
+});
+const closeShare = () => $s("sharewrap").classList.remove("show");
+$s("shx").addEventListener("click", closeShare);
+$s("sharewrap").addEventListener("click", e => { if (e.target === $s("sharewrap")) closeShare(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeShare(); });
+async function copy(t, note){ try { await navigator.clipboard.writeText(t); $s("shok").textContent = note; } catch (e) { $s("shok").textContent = "Select the text and copy it."; } }
+$s("shcap").addEventListener("click", () => copy($s("shtext").value, "Caption copied. Paste it into your Instagram post."));
+$s("shlink").addEventListener("click", () => copy(CARD.url, "Card link copied. Add it to a Story with the Link sticker."));
+$s("shshare").addEventListener("click", async () => {
+  if (!postBlob) return;
+  const file = new File([postBlob], `kusportscards-${CARD.id}.jpg`, {type: "image/jpeg"});
+  try { await navigator.clipboard.writeText($s("shtext").value); } catch (e) {}
+  if (navigator.canShare && navigator.canShare({files: [file]})) {
+    try { await navigator.share({files: [file]}); $s("shok").textContent = "Caption is copied. Paste it when Instagram asks for one."; } catch (e) {}
+  } else { $s("shsave").click(); $s("shok").textContent = "Image saved and caption copied. Upload the image to Instagram and paste the caption."; }
+});
+
 document.querySelectorAll(".thumbs button").forEach(b => b.addEventListener("click", () => {
   document.getElementById("main").src = b.dataset.src;
   document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-pressed", x === b));
