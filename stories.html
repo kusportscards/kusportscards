@@ -31,6 +31,7 @@ ol{margin:0;padding-left:20px}li{margin:4px 0}
 <div class="panel">
   <div class="seg" id="tabs"></div>
   <div class="seg" id="sports"></div>
+  <div class="seg" id="sorts"></div>
   <button class="big go" id="make"></button>
   <div class="bar hide" id="bar"><i></i></div>
   <button class="big save hide" id="save"></button>
@@ -81,16 +82,21 @@ async function drawStory(d){ /* d = {photo, name, price} */
 const $ = id => document.getElementById(id);
 const VIEWS = [{k:"all",l:"All",t:()=>true},{k:"graded",l:"Graded",t:c=>!!c.grade},{k:"one",l:"1/1s",t:c=>c.serial==="1/1"},{k:"raw",l:"Raw",t:c=>!c.grade}];
 const SPORTS = ["All", ...["NFL","NBA","MLB","NHL","Soccer"].filter(s => CARDS.some(c => c.sport === s))];
-const st = {view:"all", sport:"All"}; let files = [];
-const pick = () => CARDS.filter(c => VIEWS.find(v=>v.k===st.view).t(c) && (st.sport==="All" || c.sport===st.sport)).sort((a,b)=>b.ask-a.ask);
+const SORTS = [{k:"new",l:"Newest first",f:(a,b)=>(b.date||"").localeCompare(a.date||"")},
+  {k:"old",l:"Oldest first",f:(a,b)=>(a.date||"9").localeCompare(b.date||"9")},
+  {k:"high",l:"Price: high to low",f:(a,b)=>b.ask-a.ask},{k:"low",l:"Price: low to high",f:(a,b)=>a.ask-b.ask}];
+const st = {view:"all", sport:"All", sort:"new"}; let files = [];
+const pick = () => CARDS.filter(c => VIEWS.find(v=>v.k===st.view).t(c) && (st.sport==="All" || c.sport===st.sport)).sort(SORTS.find(s=>s.k===st.sort).f);
 function draw(){
   $("tabs").innerHTML = VIEWS.map(v => `<button data-v="${v.k}" aria-pressed="${st.view===v.k}">${v.l}</button>`).join("");
   $("sports").innerHTML = SPORTS.map(s => `<button data-s="${s}" aria-pressed="${st.sport===s}">${s==="All"?"All sports":s}</button>`).join("");
+  $("sorts").innerHTML = SORTS.map(s => `<button data-o="${s.k}" aria-pressed="${st.sort===s.k}">${s.l}</button>`).join("");
   const n = pick().length; $("make").textContent = `Make ${n} Story image${n===1?"":"s"}`; $("make").disabled = !n;
   files = []; $("save").classList.add("hide"); $("bar").classList.add("hide"); $("msg").textContent = ""; $("thumbs").innerHTML = "";
 }
 $("tabs").onclick = e => { const b = e.target.closest("[data-v]"); if (b){ st.view = b.dataset.v; draw(); } };
 $("sports").onclick = e => { const b = e.target.closest("[data-s]"); if (b){ st.sport = b.dataset.s; draw(); } };
+$("sorts").onclick = e => { const b = e.target.closest("[data-o]"); if (b){ st.sort = b.dataset.o; draw(); } };
 $("make").onclick = async () => {
   const list = pick(); files = []; $("make").disabled = true; $("bar").classList.remove("hide"); $("thumbs").innerHTML = "";
   for (let i = 0; i < list.length; i++){
@@ -103,7 +109,7 @@ $("make").onclick = async () => {
     $("bar").firstElementChild.style.width = `${(i + 1) / list.length * 100}%`;
   }
   $("make").disabled = false;
-  $("msg").textContent = `${files.length} images ready, highest price first.`;
+  $("msg").textContent = `${files.length} images ready, ${SORTS.find(s=>s.k===st.sort).l.toLowerCase()}. They save in this order.`;
   $("save").textContent = `Save all ${files.length} to my phone`; $("save").classList.remove("hide");
 };
 $("save").onclick = async () => {
