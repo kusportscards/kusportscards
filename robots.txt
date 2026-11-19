@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kusportscards.github.io/kusportscards/sitemap.xml

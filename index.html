@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KU Sports Cards</title>
+<title>KU Sports Cards | Graded Cards, Numbered Parallels and 1/1s</title>
+<meta name="description" content="Shop 49 sports cards from KU Sports Cards: graded slabs, numbered parallels and 1/1s from Mahomes, Brady, Jordan, Burrow and more. Message us on Instagram, text or email to buy.">
+<link rel="canonical" href="https://kusportscards.github.io/kusportscards/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="KU Sports Cards">
+<meta property="og:description" content="Shop 49 sports cards from KU Sports Cards: graded slabs, numbered parallels and 1/1s from Mahomes, Brady, Jordan, Burrow and more. Message us on Instagram, text or email to buy.">
+<meta property="og:image" content="https://kusportscards.github.io/kusportscards/logo.png">
+<meta property="og:url" content="https://kusportscards.github.io/kusportscards/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -285,6 +292,8 @@ const CERTS = {"C004":"8529785","C095":"2287132","C006":"162347033","C007":"1520
 CARDS.forEach(c => { if (!c.cert && CERTS[c.id]) c.cert = CERTS[c.id]; });
 
 const $ = s => document.querySelector(s);
+/* Each card has its own page at cards/<name>.html (built with the site). */
+const slug = c => `${c.year} ${c.player} ${c.set} ${c.grade} ${c.id}`.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 const money = n => "$" + n.toLocaleString("en-US",{maximumFractionDigits:0});
 const esc = t => String(t).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 const state = {sport:"All", view:"all", q:"", sort:"high"};
@@ -336,9 +345,9 @@ $("#sort").addEventListener("change", e => { state.sort = e.target.value; render
 function media(c){
   const badges = `<div class="badges">${c.grade?`<span class="badge">${esc(c.grade)}</span>`:""}${c.serial==="1/1"?`<span class="badge one">1/1</span>`:(c.serial?`<span class="badge">${esc(c.serial)}</span>`:"")}</div>`;
   const p = PHOTOS[c.id];
-  if (p) return `<div class="media"><a class="mlink" href="#card-${c.id}" aria-label="View ${esc(c.player)} card"><img src="${p[0]}" alt="Front of the ${esc(c.year+" "+c.player+" "+c.set)} card" loading="lazy" width="600" height="800">${badges}</a>${p[1]?`<button class="flip" data-flip="${c.id}" aria-pressed="false">Show back</button>`:""}</div>`;
+  if (p) return `<div class="media"><a class="mlink" href="cards/${slug(c)}.html" aria-label="View ${esc(c.player)} card"><img src="${p[0]}" alt="Front of the ${esc(c.year+" "+c.player+" "+c.set)} card" loading="lazy" width="600" height="800">${badges}</a>${p[1]?`<button class="flip" data-flip="${c.id}" aria-pressed="false">Show back</button>`:""}</div>`;
   const mark = c.serial==="1/1" ? `<span class="mark one">1/1</span>` : `<span class="mark">${esc(c.serial || c.year)}</span>`;
-  return `<a class="media empty" href="#card-${c.id}" aria-label="View ${esc(c.player)} card">${c.grade?badges:""}${mark}<span class="cap">Photo coming soon</span></a>`;
+  return `<a class="media empty" href="cards/${slug(c)}.html" aria-label="View ${esc(c.player)} card">${c.grade?badges:""}${mark}<span class="cap">Photo coming soon</span></a>`;
 }
 
 function render(){
@@ -356,7 +365,7 @@ function render(){
       ${media(c)}
       <div class="body">
         <div class="meta">${esc(c.year+" "+c.set)}</div>
-        <h3 class="player"><a href="#card-${c.id}">${esc(c.player)}</a></h3>
+        <h3 class="player"><a href="cards/${slug(c)}.html">${esc(c.player)}</a></h3>
         <div class="row">${c.ask ? `<span class="price">${money(c.ask)}</span>` : `<span class="price ask">Message for price</span>`}<span class="id">${c.id}</span></div>
         <button class="buy" data-copy="${c.id}">I want this card</button>
         <p class="copied" id="m-${c.id}" aria-live="polite"></p>
@@ -455,7 +464,7 @@ function openCard(c){
 }
 function route(){
   const m = location.hash.match(/^#card-(C\d+)$/), c = m && CARDS.find(x => x.id === m[1]);
-  if (c) { if (!document.body.classList.contains("viewing")) listScroll = window.scrollY; openCard(c); }
+  if (c) { location.replace("cards/" + slug(c) + ".html"); return; }
   else if (document.body.classList.contains("viewing")) {
     document.body.classList.remove("viewing"); document.title = SHOP.name; window.scrollTo(0, listScroll);
   }
