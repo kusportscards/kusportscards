@@ -130,17 +130,12 @@ async function drawPost(){
   await Promise.all([document.fonts.load("800 60px Montserrat")]).catch(()=>{});
   const cv = document.createElement("canvas"); cv.width = 1080; cv.height = 1920; const ctx = cv.getContext("2d");
   ctx.fillStyle = "#142034"; ctx.fillRect(0, 0, 1080, 1920);
-  /* Logo across the top, then the photo edge to edge across the full width (1080x1220).
-     The photo's top strip of mat is trimmed so the card itself stays in view. */
-  try {
-    const lg = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = "../logo-light.png"; });
-    const lw = 470, lh = lg.height * lw / lg.width; ctx.drawImage(lg, (1080 - lw) / 2, 30, lw, lh);
-  } catch (e) {}
+  /* Photo runs edge to edge across the full width, in a 1080x1440 area at the top. */
   if (CARD.photo){
     const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = CARD.photo; });
-    const top = 220, boxH = 1220, sc = 1080 / img.width, h = img.height * sc;
-    if (h >= boxH) { const sh = boxH / sc, cut = (img.height - sh) * 0.75; ctx.drawImage(img, 0, cut, img.width, sh, 0, top, 1080, boxH); }
-    else ctx.drawImage(img, 0, top + (boxH - h) / 2, 1080, h);
+    const boxH = 1440, sc = 1080 / img.width, h = img.height * sc;
+    if (h >= boxH) { const sh = boxH / sc; ctx.drawImage(img, 0, (img.height - sh) / 2, img.width, sh, 0, 0, 1080, boxH); }
+    else ctx.drawImage(img, 0, (boxH - h) / 2, 1080, h);
   }
   const name = `${CARD.line.split(" ")[0]} ${CARD.player} ${CARD.line.split(" ").slice(1).join(" ")}${CARD.grade ? " " + CARD.grade : ""}`;
   ctx.textAlign = "center"; ctx.fillStyle = "#FFFFFF";
